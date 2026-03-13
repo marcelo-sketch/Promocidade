@@ -1,0 +1,330 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromoCidade | Ofertas Ativas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #4f46e5; --secondary: #f59e0b; --bg: #f8fafc; --text: #1e293b; --danger: #ef4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
+
+        /* AUTH & SCREENS */
+        #auth-screen {
+            position: fixed; inset: 0; background: linear-gradient(135deg, #4f46e5, #3730a3);
+            z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .auth-card { background: white; width: 100%; max-width: 380px; padding: 30px; border-radius: 24px; text-align: center; }
+        
+        /* FORMS */
+        .input-group { margin-bottom: 12px; text-align: left; }
+        label { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-left: 5px; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 2px solid #f1f5f9; 
+            border-radius: 12px; font-size: 15px; background: #f8fafc;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+        
+        .btn-go { 
+            width: 100%; padding: 16px; background: var(--primary); color: white; 
+            border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+
+        /* CONTENT */
+        #app-content { display: none; }
+        header {
+            background: white; padding: 20px; display: flex; justify-content: space-between; 
+            align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100;
+        }
+
+        /* CARDS */
+        .promo-card { background: white; border-radius: 22px; margin: 15px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); position: relative; }
+        .promo-img { width: 100%; height: 200px; object-fit: cover; }
+        .promo-body { padding: 18px; }
+        .validity-tag { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn-zap { background: #22c55e; color: white; text-decoration: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-share { background: #f1f5f9; color: #475569; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+        /* ADMIN */
+        #img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin: 10px 0; display: none; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #e2e8f0; box-shadow: 0 -5px 10px rgba(0,0,0,0.02); }
+        .nav-item { color: #94a3b8; font-size: 11px; text-align: center; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-item i { font-size: 22px; display: block; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div id="auth-login" class="auth-card">
+            <h2 style="color: var(--primary);">PromoCidade</h2>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 25px;">Acesse as ofertas da sua cidade</p>
+            <div class="input-group"><input type="email" id="l-email" placeholder="E-mail"></div>
+            <div class="input-group"><input type="password" id="l-pass" placeholder="Senha"></div>
+            <button class="btn-go" onclick="sys.login()">Entrar</button>
+            <p style="margin-top: 20px; font-size: 14px;">É novo? <a href="#" onclick="sys.viewAuth('reg')" style="color: var(--primary); font-weight: bold;">Crie sua conta</a></p>
+            <p style="margin-top: 20px; font-size: 11px; color: #94a3b8; cursor: pointer;" onclick="sys.viewAuth('adm')">Painel do Lojista</p>
+        </div>
+
+        <div id="auth-reg" class="auth-card hidden">
+            <h2>Cadastrar</h2>
+            <div class="input-group"><input type="text" id="r-name" placeholder="Nome"></div>
+            <div class="input-group"><input type="email" id="r-email" placeholder="E-mail"></div>
+            <div class="input-group"><input type="password" id="r-pass" placeholder="Senha"></div>
+            <button class="btn-go" onclick="sys.register()">Concluir Cadastro</button>
+            <p style="margin-top: 15px;" onclick="sys.viewAuth('login')">Voltar</p>
+        </div>
+
+        <div id="auth-adm" class="auth-card hidden">
+            <h2>Lojista</h2>
+            <div class="input-group"><input type="text" id="adm-u" placeholder="Usuário"></div>
+            <div class="input-group"><input type="password" id="adm-p" placeholder="Senha"></div>
+            <button class="btn-go" style="background: #1e293b;" onclick="sys.loginAdmin()">Acessar Admin</button>
+            <p style="margin-top: 15px;" onclick="sys.viewAuth('login')">Voltar</p>
+        </div>
+    </div>
+
+    <div id="app-content">
+        <header>
+            <div><span style="font-size: 12px; color: #64748b;">Boas vindas,</span> <h4 id="user-name">Usuário</h4></div>
+            <i class="fas fa-power-off" onclick="sys.logout()" style="color: var(--danger); font-size: 20px;"></i>
+        </header>
+
+        <section id="view-home" class="view">
+            <div id="promo-feed"></div>
+        </section>
+
+        <section id="view-favs" class="view hidden">
+            <h3 style="padding: 20px;">Meus Favoritos</h3>
+            <div id="fav-feed"></div>
+        </section>
+
+        <section id="view-admin" class="view hidden" style="padding: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                <h3 style="margin-bottom: 15px;">Criar Promoção</h3>
+                
+                <label>Foto da Loja:</label>
+                <input type="file" id="s-file" accept="image/*" onchange="sys.previewImg(this)" style="margin-bottom: 10px;">
+                <img id="img-preview">
+
+                <div class="input-group">
+                    <label>Nome da Loja:</label>
+                    <input type="text" id="s-name" placeholder="Ex: Pizzaria do Zé">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group">
+                        <label>Início:</label>
+                        <input type="date" id="s-start">
+                    </div>
+                    <div class="input-group">
+                        <label>Expiração:</label>
+                        <input type="date" id="s-expiry">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Categoria:</label>
+                    <select id="s-cat">
+                        <option value="lanchonete">Lanchonete</option>
+                        <option value="pizzaria">Pizzaria</option>
+                        <option value="loja">Loja</option>
+                        <option value="salão de beleza">Salão de Beleza</option>
+                        <option value="peixaria">Peixaria</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Descrição:</label>
+                    <textarea id="s-desc" placeholder="Descreva a oferta..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>WhatsApp:</label>
+                    <input type="text" id="s-zap" placeholder="Ex: 5599999999999">
+                </div>
+
+                <button class="btn-go" onclick="sys.saveShop()">Publicar Promoção</button>
+            </div>
+            <div id="admin-stats" style="margin: 20px 10px; font-weight: bold; font-size: 14px; color: var(--primary);"></div>
+            <div id="admin-list"></div>
+        </section>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" id="n-home" onclick="sys.changeView('home')"><i class="fas fa-fire"></i>Início</div>
+            <div class="nav-item" id="n-favs" onclick="sys.changeView('favs')"><i class="fas fa-heart"></i>Favoritos</div>
+            <div class="nav-item hidden" id="n-admin" onclick="sys.changeView('admin')"><i class="fas fa-user-shield"></i>Admin</div>
+        </nav>
+    </div>
+
+    <script>
+        const sys = {
+            db: JSON.parse(localStorage.getItem('promo_v5')) || { users: [], shops: [], favs: [], session: null },
+            tempImg: "",
+
+            save() { 
+                localStorage.setItem('promo_v5', JSON.stringify(this.db)); 
+                this.render(); 
+            },
+
+            previewImg(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const maxW = 500;
+                            const scale = maxW / img.width;
+                            canvas.width = maxW;
+                            canvas.height = img.height * scale;
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            this.tempImg = canvas.toDataURL('image/jpeg', 0.6);
+                            document.getElementById('img-preview').src = this.tempImg;
+                            document.getElementById('img-preview').style.display = 'block';
+                        }
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            },
+
+            viewAuth(t) {
+                document.getElementById('auth-login').classList.add('hidden');
+                document.getElementById('auth-reg').classList.add('hidden');
+                document.getElementById('auth-adm').classList.add('hidden');
+                document.getElementById('auth-' + t).classList.remove('hidden');
+            },
+
+            login() {
+                const user = this.db.users.find(u => u.email === document.getElementById('l-email').value && u.pass === document.getElementById('l-pass').value);
+                if(user) { this.db.session = { name: user.name, role: 'user' }; this.initApp(); }
+                else alert("Dados inválidos!");
+            },
+
+            loginAdmin() {
+                if(document.getElementById('adm-u').value === 'admin2095' && document.getElementById('adm-p').value === '#1234#') {
+                    this.db.session = { name: 'Administrador', role: 'admin' };
+                    this.initApp();
+                } else alert("Acesso restrito!");
+            },
+
+            register() {
+                const n = document.getElementById('r-name').value;
+                const e = document.getElementById('r-email').value;
+                const p = document.getElementById('r-pass').value;
+                if(!n || !e || !p) return alert("Preencha tudo!");
+                this.db.users.push({ name: n, email: e, pass: p });
+                this.save();
+                this.viewAuth('login');
+            },
+
+            initApp() {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-content').style.display = 'block';
+                document.getElementById('user-name').innerText = this.db.session.name;
+                if(this.db.session.role === 'admin') document.getElementById('n-admin').classList.remove('hidden');
+                this.render();
+            },
+
+            logout() { this.db.session = null; localStorage.setItem('promo_v5', JSON.stringify(this.db)); window.location.reload(); },
+
+            changeView(v) {
+                document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                document.getElementById('view-' + v).classList.remove('hidden');
+                document.getElementById('n-' + v).classList.add('active');
+            },
+
+            saveShop() {
+                const s = {
+                    id: Date.now(),
+                    name: document.getElementById('s-name').value,
+                    cat: document.getElementById('s-cat').value,
+                    img: this.tempImg,
+                    desc: document.getElementById('s-desc').value,
+                    zap: document.getElementById('s-zap').value,
+                    start: document.getElementById('s-start').value,
+                    expiry: document.getElementById('s-expiry').value
+                };
+                if(!s.name || !s.img || !s.expiry) return alert("Preencha Nome, Foto e Data de Expiração!");
+                this.db.shops.push(s);
+                this.tempImg = ""; 
+                this.save();
+                alert("Promoção Criada!");
+            },
+
+            share(id) {
+                const s = this.db.shops.find(x => x.id === id);
+                const text = `Olha essa promoção que encontrei no PromoCidade:\n\n*${s.name.toUpperCase()}*\n${s.desc}\n\nVeja aqui: ${window.location.href}`;
+                
+                if (navigator.share) {
+                    navigator.share({ title: 'PromoCidade', text: text, url: window.location.href });
+                } else {
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`);
+                }
+            },
+
+            render() {
+                const now = new Date().toISOString().split('T')[0];
+                const feed = document.getElementById('promo-feed');
+                const adminList = document.getElementById('admin-list');
+                
+                // Filtra apenas as que não expiraram
+                const activeShops = this.db.shops.filter(s => !s.expiry || s.expiry >= now);
+
+                feed.innerHTML = activeShops.map(s => this.tpl(s)).join('') || "<p style='text-align:center; padding:40px;'>Sem ofertas válidas no momento.</p>";
+                document.getElementById('fav-feed').innerHTML = activeShops.filter(s => this.db.favs.includes(s.id)).map(s => this.tpl(s)).join('');
+                
+                if(this.db.session?.role === 'admin') {
+                    document.getElementById('admin-stats').innerText = `Clientes: ${this.db.users.length} | Ativas: ${activeShops.length}`;
+                    adminList.innerHTML = this.db.shops.map(s => `
+                        <div style="background:white; padding:15px; border-radius:15px; margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:13px;">${s.name} ${s.expiry < now ? '❌' : '✅'}</span>
+                            <button onclick="sys.remove(${s.id})" style="color:red; border:none; background:none;">Excluir</button>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            remove(id) { if(confirm("Remover?")) { this.db.shops = this.db.shops.filter(s => s.id !== id); this.save(); } },
+            toggleFav(id) { const i = this.db.favs.indexOf(id); if(i > -1) this.db.favs.splice(i, 1); else this.db.favs.push(id); this.save(); },
+
+            tpl(s) {
+                const isFav = this.db.favs.includes(s.id);
+                // Formatação da data BR
+                const dataBr = s.expiry.split('-').reverse().join('/');
+                return `
+                    <div class="promo-card">
+                        <i class="fas fa-heart" onclick="sys.toggleFav(${s.id})" style="position:absolute; top:15px; right:15px; color:${isFav ? '#ef4444' : 'white'}; font-size:24px; z-index:10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));"></i>
+                        <img src="${s.img}" class="promo-img">
+                        <div class="promo-body">
+                            <span style="font-size:10px; background:#e0e7ff; color:var(--primary); padding:3px 8px; border-radius:10px; font-weight:800;">${s.cat.toUpperCase()}</span>
+                            <h3 style="margin:5px 0 2px 0;">${s.name}</h3>
+                            <div class="validity-tag"><i class="far fa-clock"></i> Válido até: ${dataBr}</div>
+                            <p style="font-size:14px; color:#64748b; margin:10px 0;">${s.desc}</p>
+                            
+                            <div class="actions-grid">
+                                <a href="https://wa.me/${s.zap}?text=Vi%20a%20promoção%20da%20${s.name}%20no%20site!" target="_blank" class="btn-zap">
+                                    <i class="fab fa-whatsapp"></i> Falar com Loja
+                                </a>
+                                <button class="btn-share" onclick="sys.share(${s.id})">
+                                    <i class="fas fa-share-alt"></i> Compartilhar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        if(sys.db.session) sys.initApp();
+    </script>
+</body>
+</html>
